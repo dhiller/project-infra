@@ -3,6 +3,7 @@ package main_test
 import (
 	"bytes"
 	"fmt"
+	"github.com/joshdk/go-junit"
 	"log"
 	"os"
 	"time"
@@ -390,5 +391,75 @@ var _ = Describe("report.go", func() {
 		Entry("results being ModeratelyFlaky", &Details{Failed: 1, Succeeded: 5, Skipped: 2, Jobs: []*Job{}}, ModeratelyFlaky),
 		Entry("results being MildlyFlaky", &Details{Failed: 1, Succeeded: 10, Skipped: 2, Jobs: []*Job{}}, MildlyFlaky),
 	)
+
+	When("reporting", func() {
+
+		var buffer bytes.Buffer
+
+		executeReportWithTestData := func(results []*Result) {
+			buffer = bytes.Buffer{}
+			err := Report(results, &buffer, "org", "repo", []int{17, 42})
+			Expect(err).ToNot(HaveOccurred())
+			if testOptions.printTestOutput {
+				logger := log.New(os.Stdout, "report_test.go (reporting):", log.Flags())
+				logger.Printf(buffer.String())
+			}
+		}
+
+		It("Works in general with some data ", func() {
+			duration, err := time.ParseDuration("1h5m3s")
+			Expect(err).ToNot(HaveOccurred())
+			totals := junit.Totals{
+				Tests:    42,
+				Passed:   37,
+				Skipped:  1,
+				Failed:   2,
+				Error:    2,
+				Duration: duration,
+			}
+			executeReportWithTestData([]*Result{{
+				Job: "test",
+				JUnit: []junit.Suite{{
+					Name:       "meh",
+					Package:    "moo",
+					Properties: map[string]string{"bleh": "blip"},
+					Tests:      []junit.Test{
+						{
+							Name:       "flaky1",
+							Classname:  "class1",
+							Duration:   duration,
+							Status:     junit.StatusFailed,
+							Error:      fmt.Errorf("FAIL: error blah"),
+							Properties: map[string]string{"bleh": "blip"},
+						},
+						{
+							Name:       "flaky1",
+							Classname:  "class2",
+							Duration:   duration,
+							Status:     junit.StatusPassed,
+							Error:      nil,
+							Properties: map[string]string{"bleh": "blip"},
+						},
+						{
+							Name:       "flaky1",
+							Classname:  "class3",
+							Duration:   duration,
+							Status:     junit.StatusSkipped,
+							Error:      nil,
+							Properties: map[string]string{"bleh": "blip"},
+						},
+					},
+					SystemOut:  "INFO: But you need to find the question!",
+					SystemErr:  "ERROR: The answer is 42!", Totals: totals,
+				}},
+				BuildNumber: 42, PR: 37,
+			},
+			})
+			Expect(buffer.String()).To(ContainSubstring(`"failed tests">1<`))
+			Expect(buffer.String()).To(ContainSubstring(`"passed tests">1<`))
+			Expect(buffer.String()).To(ContainSubstring(`"skipped tests">1<`))
+		})
+
+	})
 
 })

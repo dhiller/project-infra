@@ -238,16 +238,16 @@ func CreateReportFileName(reportTime time.Time, merged time.Duration) string {
 	return fmt.Sprintf(ReportFilePrefix+"%s-%03dh.html", reportTime.Format("2006-01-02"), int(merged.Hours()))
 }
 
-func Report(results []*Result, reportOutputWriter *storage.Writer, org string, repo string, prNumbers []int) error {
+func Report(results []*Result, reportOutputWriter io.Writer, org string, repo string, prNumbers []int) error {
 	data := map[string]map[string]*Details{}
 	headers := []string{}
 	tests := []string{}
 	buildNumberMap := map[int]struct{}{}
 	headerMap := map[string]struct{}{}
 
+	// 1) find failing tests to isolate tests which interest us
 	for _, result := range results {
 
-		// first find failing tests to isolate tests which interest us
 		for _, suite := range result.JUnit {
 			for _, test := range suite.Tests {
 				if test.Status == junit.StatusFailed || test.Status == junit.StatusError {
@@ -273,7 +273,7 @@ func Report(results []*Result, reportOutputWriter *storage.Writer, org string, r
 
 	}
 
-	// second enrich failed tests with additional information
+	// 2) enrich failed tests with additional information (number of tests skipped, succeeded)
 	for _, result := range results {
 		if _, exists := buildNumberMap[result.BuildNumber]; !exists {
 			// if not in the map now, then skip it
@@ -299,8 +299,7 @@ func Report(results []*Result, reportOutputWriter *storage.Writer, org string, r
 		}
 	}
 
-	// third, calculate the severity
-	// second enrich failed tests with additional information
+	// 3) add severity to each test result
 	for _, result := range results {
 		if _, exists := buildNumberMap[result.BuildNumber]; !exists {
 			// if not in the map now, then skip it
