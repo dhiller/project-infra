@@ -23,12 +23,15 @@ import (
 	"cloud.google.com/go/storage"
 	"context"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/push"
 	"html/template"
 	"io"
 	"log"
 	"os"
 	"path"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/joshdk/go-junit"
@@ -238,7 +241,7 @@ func WriteReportToBucket(ctx context.Context, client *storage.Client, reports []
 	if !isDryRun {
 		reportOutputWriter = reportObject.NewWriter(ctx)
 	}
-	err = Report(reports, reportOutputWriter, org, repo, prNumbers, writeToStdout, isDryRun, startOfReport, endOfReport)
+	err = Report(reports, reportOutputWriter, org, repo, prNumbers, writeToStdout, isDryRun, startOfReport, endOfReport, merged)
 	if err != nil {
 		return fmt.Errorf("failed on generating report: %v", err)
 	}
@@ -255,7 +258,7 @@ func CreateReportFileName(reportTime time.Time, merged time.Duration) string {
 	return fmt.Sprintf(ReportFilePrefix+"%s-%03dh.html", reportTime.Format("2006-01-02"), int(merged.Hours()))
 }
 
-func Report(results []*Result, reportOutputWriter *storage.Writer, org string, repo string, prNumbers []int, writeToStdout bool, isDryRun bool, startOfReport, endOfReport time.Time) error {
+func Report(results []*Result, reportOutputWriter *storage.Writer, org, repo string, prNumbers []int, writeToStdout, isDryRun bool, startOfReport, endOfReport time.Time, merged time.Duration) error {
 	data := map[string]map[string]*Details{}
 	headers := []string{}
 	tests := []string{}
@@ -339,6 +342,25 @@ func Report(results []*Result, reportOutputWriter *storage.Writer, org string, r
 		}
 	}
 
+	pusher := push.New("http://localhost:9091/", "flakefinder-report").Grouping("date", endOfReport.Format("2006-01-02")).Grouping("merged", merged.String())
+	labels := []string{"pr", "lane", "build", "test", "state"}
+	testsCounter := prometheus.NewCounterVec(prometheus.CounterOpts{Namespace: org, Subsystem: repo, Name: "tests"}, labels)
+	pusher.Collector(testsCounter)
+	for _, result := range results {
+		buildNumber := strconv.Itoa(result.BuildNumber)
+		pr := strconv.Itoa(result.PR)
+		job := result.Job
+		for _, junitResult := range result.JUnit {
+			for _, testResult := range junitResult.Tests {
+				testsCounter.WithLabelValues(pr, job, buildNumber, testResult.Name, string(testResult.Status)).Inc()
+			}
+		}
+	}
+	err := pusher.Push()
+	if err != nil {
+		return fmt.Errorf("failed to report to prometheus: %v", err)
+	}
+
 	testsSortedByRelevance := SortTestsByRelevance(data, tests)
 	parameters := Params{
 		Data:          data,
@@ -350,7 +372,6 @@ func Report(results []*Result, reportOutputWriter *storage.Writer, org string, r
 		Repo:          repo,
 		StartOfReport: startOfReport.Format(time.RFC3339),
 	}
-	var err error
 	if !isDryRun && reportOutputWriter != nil {
 		err = WriteReportToOutput(reportOutputWriter, parameters)
 	}
