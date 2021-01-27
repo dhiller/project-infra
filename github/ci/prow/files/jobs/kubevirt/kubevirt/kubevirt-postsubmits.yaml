@@ -60,22 +60,31 @@ postsubmits:
         env:
         - name: DOCKER_PREFIX
           value: quay.io/kubevirt
+        - name: GH_CLI_VERSION
+          value: "1.5.0"
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/gcs/service-account.json
+        - name: GITHUB_TOKEN_PATH
+          value: /etc/github/oauth
         command: [ "/usr/local/bin/runner.sh", "/bin/sh", "-c" ]
         args:
-        - |
-            tag=$(echo "$(git tag --points-at HEAD | head -1)")
-            if [ -n $"tag" ]; then
-              ./automation/travisci-test.sh
-              DOCKER_TAG="$tag"
-              make manifests
-              make build-functests
-              # TODO: create github release
-              # bash hack/gen-swagger-doc/deploy.sh
-              # hack/publish-staging.sh
-            fi
+        - GITHUB_TOKEN=$(<$GITHUB_TOKEN_PATH) ./automation/release.sh
         # docker-in-docker needs privileged mode
         securityContext:
           privileged: true
         resources:
           requests:
             memory: "8Gi"
+        volumeMounts:
+          - name: token
+            mountPath: /etc/github
+          - name: gcs
+            mountPath: /etc/gcs
+            readOnly: true
+    volumes:
+      - name: token
+        secret:
+          secretName: oauth-token
+      - name: gcs
+        secret:
+          secretName: gcs
