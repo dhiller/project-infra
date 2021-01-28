@@ -76,12 +76,12 @@ postsubmits:
           requests:
             memory: "8Gi"
         volumeMounts:
-          - name: token
-            mountPath: /etc/github
-          - name: gcs
-            mountPath: /etc/gcs
-            readOnly: true
-    volumes:
+        - name: token
+          mountPath: /etc/github
+        - name: gcs
+          mountPath: /etc/gcs
+          readOnly: true
+      volumes:
       - name: token
         secret:
           secretName: oauth-token
@@ -123,12 +123,12 @@ postsubmits:
           requests:
             memory: "8Gi"
         volumeMounts:
-          - name: token
-            mountPath: /etc/github
-          - name: gcs
-            mountPath: /etc/gcs
-            readOnly: true
-    volumes:
+        - name: token
+          mountPath: /etc/github
+        - name: gcs
+          mountPath: /etc/gcs
+          readOnly: true
+      volumes:
       - name: token
         secret:
           secretName: oauth-token
