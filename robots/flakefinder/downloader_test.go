@@ -1,10 +1,9 @@
-package main_test
+package flakefinder
 
 import (
 	"github.com/google/go-github/v28/github"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	. "kubevirt.io/project-infra/robots/flakefinder"
 )
 
 var _ = Describe("downloader.go", func() {

@@ -17,7 +17,7 @@
  *
  */
 
-package main
+package flakefinder
 
 import (
 	"cloud.google.com/go/storage"
@@ -286,6 +286,23 @@ func CreateReportFileName(reportTime time.Time, merged time.Duration) string {
 }
 
 func Report(results []*Result, reportOutputWriter *storage.Writer, org string, repo string, prNumbers []int, writeToStdout bool, isDryRun bool, startOfReport, endOfReport time.Time) error {
+	parameters := createReportData(results, prNumbers, endOfReport, org, repo, startOfReport)
+	var err error
+	if !isDryRun && reportOutputWriter != nil {
+		err = flakefinder.WriteTemplateToOutput(ReportTemplate, parameters, reportOutputWriter)
+	}
+	if isDryRun || writeToStdout {
+		err = flakefinder.WriteTemplateToOutput(ReportTemplate, parameters, os.Stdout)
+	}
+
+	if err != nil {
+		return fmt.Errorf("failed to render report template: %v", err)
+	}
+
+	return nil
+}
+
+func createReportData(results []*Result, prNumbers []int, endOfReport time.Time, org string, repo string, startOfReport time.Time) Params {
 	data := map[string]map[string]*Details{}
 	headers := []string{}
 	tests := []string{}
@@ -303,9 +320,9 @@ func Report(results []*Result, reportOutputWriter *storage.Writer, org string, r
 					if !exists {
 						failuresForJobs[result.BuildNumber] = &JobFailures{
 							BuildNumber: result.BuildNumber,
-							PR: result.PR,
-							Job: result.Job,
-							Failures: 0,
+							PR:          result.PR,
+							Job:         result.Job,
+							Failures:    0,
 						}
 					}
 					failuresForJobs[result.BuildNumber].Failures = failuresForJobs[result.BuildNumber].Failures + 1
@@ -392,19 +409,7 @@ func Report(results []*Result, reportOutputWriter *storage.Writer, org string, r
 		StartOfReport:   startOfReport.Format(time.RFC3339),
 		FailuresForJobs: failuresForJobs,
 	}
-	var err error
-	if !isDryRun && reportOutputWriter != nil {
-		err = flakefinder.WriteTemplateToOutput(ReportTemplate, parameters, reportOutputWriter)
-	}
-	if isDryRun || writeToStdout {
-		err = flakefinder.WriteTemplateToOutput(ReportTemplate, parameters, os.Stdout)
-	}
-
-	if err != nil {
-		return fmt.Errorf("failed to render report template: %v", err)
-	}
-
-	return nil
+	return parameters
 }
 
 // SetSeverity sets the field Severity on the passed details according to the ratio of failed vs succeeded tests,

@@ -1,4 +1,4 @@
-package main
+package flakefinder
 
 import (
 	. "github.com/onsi/ginkgo"

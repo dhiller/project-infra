@@ -1,4 +1,4 @@
-package main_test
+package flakefinder
 
 import (
 	"flag"
@@ -9,11 +9,11 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-type options struct {
+type Options struct {
 	printTestOutput bool
 }
 
-var testOptions = options{}
+var testOptions = Options{}
 
 func TestMain(m *testing.M) {
 	flag.BoolVar(&testOptions.printTestOutput, "print_test_output", false, "Whether test output should be printed via logger")

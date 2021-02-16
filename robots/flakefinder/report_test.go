@@ -1,18 +1,19 @@
-package main_test
+package flakefinder
 
 import (
 	"bytes"
 	"fmt"
+	"github.com/joshdk/go-junit"
+	"io/ioutil"
 	"kubevirt.io/project-infra/robots/pkg/flakefinder"
 	"log"
 	"os"
+	"path"
 	"time"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/ginkgo/extensions/table"
 	. "github.com/onsi/gomega"
-
-	. "kubevirt.io/project-infra/robots/flakefinder"
 )
 
 var _ = Describe("report.go", func() {
@@ -22,7 +23,7 @@ var _ = Describe("report.go", func() {
 	reportTime, e := time.Parse("2006-01-02", "2019-08-23")
 	Expect(e).ToNot(HaveOccurred())
 
-	When("creates filename with date and merged as hours", func() {
+	When("creating filename with date and merged as hours", func() {
 
 		It("creates a filename for week", func() {
 			fileName := CreateReportFileName(reportTime, 24*7*time.Hour)
@@ -195,6 +196,109 @@ var _ = Describe("report.go", func() {
 			Expect(buffer.String()).To(ContainSubstring("4217"))
 			Expect(buffer.String()).To(ContainSubstring("k8s-1.18-whatever"))
 			Expect(buffer.String()).To(ContainSubstring("k8s-1.19-whocares"))
+		})
+
+	})
+
+	When("calculating report data", func() {
+
+		testJunitFile, err := ioutil.ReadFile(path.Join("testdata","junit.functest.1.20.1.xml"))
+		Expect(err).To(BeNil())
+		report1_20_1, err := junit.Ingest(testJunitFile)
+		Expect(err).To(BeNil())
+		testJunitFile, err = ioutil.ReadFile(path.Join("testdata","junit.functest.1.20.2.xml"))
+		Expect(err).To(BeNil())
+		report1_20_2, err := junit.Ingest(testJunitFile)
+		Expect(err).To(BeNil())
+		testJunitFile, err = ioutil.ReadFile(path.Join("testdata","junit.functest.1.18.1.xml"))
+		Expect(err).To(BeNil())
+		report1_18_1, err := junit.Ingest(testJunitFile)
+		Expect(err).To(BeNil())
+		testJunitFile, err = ioutil.ReadFile(path.Join("testdata","junit.functest.1.18.2.xml"))
+		Expect(err).To(BeNil())
+		report1_18_2, err := junit.Ingest(testJunitFile)
+		Expect(err).To(BeNil())
+
+		It("doesn't break on empty data", func() {
+			results := []*Result{}
+			prNumbers := []int{}
+			createReportData(results ,prNumbers, time.Now(), "kubevirt", "kubevirt", time.Now())
+		})
+
+		It("doesn't break on empty junit data", func() {
+			results := []*Result{
+				&Result{
+					"pull-kubevirt-e2e-k8s-1.20",
+					[]junit.Suite{},
+					1742,
+					4217,
+				},
+			}
+			prNumbers := []int{}
+			createReportData(results ,prNumbers, time.Now(), "kubevirt", "kubevirt", time.Now())
+		})
+
+		It("doesn't break on junit data", func() {
+			results := []*Result{
+				{
+					"pull-kubevirt-e2e-k8s-1.20",
+					report1_20_1,
+					1,
+					17,
+								},
+				{
+					"pull-kubevirt-e2e-k8s-1.20",
+					report1_20_2,
+					2,
+					17,
+								},
+			}
+			prNumbers := []int{17}
+			createReportData(results ,prNumbers, time.Now(), "kubevirt", "kubevirt", time.Now())
+		})
+
+		It("returns useful things", func() {
+			results := []*Result{
+				{
+					"pull-kubevirt-e2e-k8s-1.20",
+					report1_20_1,
+					1,
+					17,
+				},
+				{
+					"pull-kubevirt-e2e-k8s-1.20",
+					report1_20_2,
+					2,
+					17,
+				},
+				{
+					"pull-kubevirt-e2e-k8s-1.18",
+					report1_18_1,
+					1,
+					17,
+				},
+				{
+					"pull-kubevirt-e2e-k8s-1.18",
+					report1_18_2,
+					2,
+					17,
+				},
+			}
+			prNumbers := []int{17}
+			data := createReportData(results, prNumbers, time.Now(), "kubevirt", "kubevirt", time.Now())
+			Expect(data.Headers).To(BeEquivalentTo([]string{
+				"pull-kubevirt-e2e-k8s-1.20",
+				"pull-kubevirt-e2e-k8s-1.18",
+			}))
+			test1 := "Storage Starting a VirtualMachineInstance Run a VMI with VirtIO-FS and a datavolume should be successfully started and virtiofs could be accessed"
+			test2 := "[rfe_id:3423][crit:high][vendor:cnv-qe@redhat.com][level:component]VmWatch [test_id:3466]Should update vmi status with the proper columns using 'kubectl get vmi -w'"
+			Expect(data.Tests).To(BeEquivalentTo([]string{
+				test1,
+				test2,
+			}))
+			Expect(data.Data).To(HaveLen(2))
+			Expect(data.Data[test1]).To(HaveLen(2))
+			Expect(data.Data[test2]).To(HaveLen(2))
 		})
 
 	})

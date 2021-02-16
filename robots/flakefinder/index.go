@@ -17,7 +17,7 @@
  *
  */
 
-package main
+package flakefinder
 
 import (
 	"cloud.google.com/go/storage"
