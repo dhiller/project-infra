@@ -1,0 +1,45 @@
+postsubmits:
+  dhiller/goveralls:
+  - name: push-dhiller-goveralls-demo
+    branches:
+    - master
+    - support-prow-directly
+    always_run: true
+    annotations:
+      testgrid-create-test-group: "false"
+    decorate: true
+    decoration_config:
+      timeout: 1h
+    max_concurrency: 1
+    extra_refs:
+    - org: dhiller
+      repo: goveralls
+      base_ref: support-prow-directly
+    labels:
+      preset-docker-mirror: "true"
+    cluster: phx-prow
+    spec:
+      containers:
+      - image: golang:1.16
+        env:
+          - name: GO111MODULE
+            value: "on"
+          - name: XDG_CACHE_HOME
+            value: "/tmp/.cache"
+        command:
+          - /bin/bash
+          - -c
+          - |
+            go build github.com/mattn/goveralls
+            ./goveralls -service=prow -repotokenfile=/etc/secrets/dhiller/coveralls/token
+        resources:
+          requests:
+            memory: "200Mi"
+        volumeMounts:
+          - name: dhiller-coveralls
+            mountPath: /etc/secrets/dhiller/coveralls
+            readOnly: true
+      volumes:
+        - name: dhiller-coveralls
+          secret:
+            secretName: dhiller-coveralls-token
