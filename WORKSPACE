@@ -119,7 +119,14 @@ load("@com_adobe_rules_gitops//gitops:repositories.bzl", "rules_gitops_repositor
 
 rules_gitops_repositories()
 
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
+
+go_repository(
+    name = "com_github_thediveo_enumflag",
+    importpath = "github.com/thediveo/enumflag",
+    sum = "h1:DB3Ag69VZ7BCv6jzKECrZ0ebZrHLzFRMIFYt96s4OxM=",
+    version = "v0.10.1",
+)
 
 gazelle_dependencies()
 

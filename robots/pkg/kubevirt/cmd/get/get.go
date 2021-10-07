@@ -12,39 +12,26 @@
  *
  */
 
-package cmd
+package get
 
 import (
 	"fmt"
 
-	"kubevirt.io/project-infra/robots/pkg/kubevirt/cmd/get"
-
 	"github.com/spf13/cobra"
-
-	"kubevirt.io/project-infra/robots/pkg/kubevirt/cmd/remove"
-
-	"kubevirt.io/project-infra/robots/pkg/kubevirt/cmd/copy"
-	"kubevirt.io/project-infra/robots/pkg/kubevirt/cmd/flags"
-	"kubevirt.io/project-infra/robots/pkg/kubevirt/cmd/require"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "kubevirt",
-	Short: "kubevirt alters job definitions in project-infra for kubevirt/kubevirt repo",
+var getCommand = &cobra.Command{
+	Use:   "get",
+	Short: "kubevirt get returns data from project-infra for kubevirt/kubevirt repo from existing provider jobs",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Fprint(cmd.OutOrStderr(), cmd.UsageString())
 	},
 }
 
 func init() {
-	flags.AddPersistentFlags(rootCmd)
-
-	rootCmd.AddCommand(copy.CopyCommand())
-	rootCmd.AddCommand(require.RequireCommand())
-	rootCmd.AddCommand(remove.RemoveCommand())
-	rootCmd.AddCommand(get.GetCommand())
+	getCommand.AddCommand(GetJobsCommand())
 }
 
-func Execute() error {
-	return rootCmd.Execute()
+func GetCommand() *cobra.Command {
+	return getCommand
 }
