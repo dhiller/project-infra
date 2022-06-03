@@ -216,20 +216,9 @@ func SortTestsByRelevance(data map[string]map[string]*Details, tests []string) (
 			// Also using the ratio of #tests_failed / #tests_succeeded as a factor emphasizes tests
 			// with less failures but a high ratio far more than tests with higher number of tests.
 			// As we want to emphasize tests that have higher failure numbers over those that have less failures,
-			// we tabularize the severity as a factor according to the relation of #tests_failed / #tests_succeeded
-			// We then multiply that value by the number of failures.
-			var severityRatio float32
-			switch {
-			case details.Failed > 3*details.Succeeded:
-				severityRatio = 1.75
-			case details.Failed > details.Succeeded:
-				severityRatio = 1.5
-			case details.Failed < details.Succeeded:
-				severityRatio = 0.75
-			default:
-				severityRatio = 1
-			}
-			severityRatio = severityRatio * float32(details.Failed)
+			// we set a base emphasis, add to this the severity expressed by the division of #tests_failed / #tests_succeeded (plus some correction factor to avoid zero values for succeeded)
+			// and finally multiply the result by the number of failures minus number of succeeded.
+			severityRatio := (0.75 + float32(details.Failed)/5*(float32(details.Succeeded)+0.5)) * float32(details.Failed-details.Succeeded)
 			if _, exists := testsToSeveritiesWithNumbers[test]; !exists {
 				testsToSeveritiesWithNumbers[test] = map[string]int{details.Severity: int(severityRatio)}
 			} else {
