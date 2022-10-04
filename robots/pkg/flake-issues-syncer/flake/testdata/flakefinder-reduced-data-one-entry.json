@@ -1,0 +1,41 @@
+{
+  "startOfReport": "2022-09-29T00:00:00Z",
+  "endOfReport": "2022-09-29T23:59:59Z",
+  "headers": [
+    "pull-kubevirt-e2e-kind-1.23-vgpu"
+  ],
+  "tests": [
+    "[Serial][sig-compute]MediatedDevices with mediated devices configuration Should override default mdev configuration on a specific node"
+  ],
+  "data": {
+    "[Serial][sig-compute]MediatedDevices with mediated devices configuration Should override default mdev configuration on a specific node": {
+      "pull-kubevirt-e2e-kind-1.23-vgpu": {
+        "succeeded": 0,
+        "skipped": 0,
+        "failed": 4,
+        "severity": "red",
+        "jobs": [
+          {
+            "buildNumber": 1575059363163279360,
+            "severity": "red",
+            "pr": 8528,
+            "job": "pull-kubevirt-e2e-kind-1.23-vgpu"
+          }
+        ]
+      }
+    }
+  },
+  "prNumbers": [
+    8536
+  ],
+  "org": "kubevirt",
+  "repo": "kubevirt",
+  "failuresForJobs": {
+    "periodic-kubevirt-e2e-k8s-1.22-sig-storage-1575364869568335872": {
+      "buildNumber": 1575364869568335872,
+      "pr": 0,
+      "job": "periodic-kubevirt-e2e-k8s-1.22-sig-storage",
+      "failures": 2
+    }
+  }
+}

@@ -1,0 +1,33 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_library(
+    name = "go_default_library",
+    srcs = [
+        "issue.go",
+        "jira.go",
+        "kubevirt.go",
+        "mapping.go",
+    ],
+    importpath = "kubevirt.io/project-infra/robots/pkg/jira",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@io_k8s_test_infra//prow/config/secret:go_default_library",
+        "@com_github_andygrunwald_go_jira//:go_default_library",
+        "@com_github_joshdk_go_junit//:go_default_library",
+        "@org_golang_x_oauth2//:go_default_library",
+    ],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = [
+        "issue_test.go",
+        "jira_test.go",
+        "kubevirt_test.go",
+    ],
+    embed = [":go_default_library"],
+    deps = [
+        "@com_github_andygrunwald_go_jira//:go_default_library",
+        "@com_github_joshdk_go_junit//:go_default_library",
+    ],
+)

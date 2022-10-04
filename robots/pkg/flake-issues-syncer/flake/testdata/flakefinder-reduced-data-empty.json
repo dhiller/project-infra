@@ -1,0 +1,11 @@
+{
+  "startOfReport": "2022-09-29T00:00:00Z",
+  "endOfReport": "2022-09-29T23:59:59Z",
+  "headers": [],
+  "tests": [],
+  "data": {},
+  "prNumbers": [],
+  "org": "kubevirt",
+  "repo": "kubevirt",
+  "failuresForJobs": {}
+}

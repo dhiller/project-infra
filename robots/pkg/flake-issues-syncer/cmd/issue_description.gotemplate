@@ -1,0 +1,13 @@
+{{- /* gotype: kubevirt.io/project-infra/robots/pkg/flake-issues-syncer.Flake */ -}}
+\{\{ {{ $.TestName }} \}\}
+
+As the assignee, review the issue and decide on one of the following actions:
+ # The flake is a critical bug -> Fix the bug immediately, move this issue to in "In Progress", and keep it open until the testcase does not fail anymore
+ # The flake is non-critical -> Quarantine it (assigning [QUARANTINE] tag to test name), close this issue, and create a follow up to take the issue out of quarantine
+ # There was an infrastructure issue (anything "below" the testcase) -> Move the issue to "Obsolete"
+
+References:
+ * 24h report:
+ ** https://storage.googleapis.com/kubevirt-prow/reports/flakefinder/kubevirt/kubevirt/flakefinder-2022-10-05-024h.html#row1
+ * 168h report:
+ ** https://storage.googleapis.com/kubevirt-prow/reports/flakefinder/kubevirt/kubevirt/flakefinder-2022-10-05-168h.html#row22
