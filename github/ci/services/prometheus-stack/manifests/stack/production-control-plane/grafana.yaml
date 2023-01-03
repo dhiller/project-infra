@@ -6201,6 +6201,516 @@ data:
       "version": 19,
       "weekStart": ""
     }
+  e2e-jobs-overview-v2.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": "-- Grafana --",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": 37,
+      "iteration": 1672737952766,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "description": "",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "hiddenSeries": false,
+          "id": 13,
+          "interval": "1h",
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "8.4.0",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "Wq7NJYPGk"
+              },
+              "exemplar": true,
+              "expr": "sum (max_over_time(prowjobs{org=\"kubevirt\", state=~\"failure\", job_name=~\"${job_name}\"}[1h]))\n/\nsum (max_over_time(prowjobs{org=\"kubevirt\", state=~\"success|failure\", job_name=~\"${job_name}\"}[1h]))\n* 100",
+              "interval": "1h",
+              "legendFormat": "",
+              "queryType": "randomWalk",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "lane failures % overall",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "max": "100",
+              "min": "0",
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "description": "",
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 8
+          },
+          "hiddenSeries": false,
+          "id": 4,
+          "interval": "1h",
+          "legend": {
+            "alignAsTable": true,
+            "avg": false,
+            "current": true,
+            "max": false,
+            "min": false,
+            "rightSide": true,
+            "show": true,
+            "sort": "current",
+            "sortDesc": true,
+            "total": false,
+            "values": true
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "8.4.0",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "Wq7NJYPGk"
+              },
+              "exemplar": true,
+              "expr": "sum by (job_name)\n(prowjobs{org=\"kubevirt\", state=~\"failure\", job_name=~\"${job_name}\"})\n/\nsum by (job_name)\n(prowjobs{org=\"kubevirt\", state=~\"success|failure\", job_name=~\"${job_name}\"})\n* 100",
+              "interval": "1h",
+              "legendFormat": "{{job_name}}",
+              "queryType": "randomWalk",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "lane failures % per lane",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 15
+          },
+          "hiddenSeries": false,
+          "id": 11,
+          "interval": "1h",
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "8.4.0",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "Wq7NJYPGk"
+              },
+              "exemplar": true,
+              "expr": "sum by (job_name)\n(prowjobs{org=\"kubevirt\", state=~\"success\", job_name=~\"${job_name}\"})  ",
+              "interval": "1h",
+              "legendFormat": "{{job_name}}",
+              "queryType": "randomWalk",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "lane succeeded",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        },
+        {
+          "aliasColors": {},
+          "bars": false,
+          "dashLength": 10,
+          "dashes": false,
+          "fill": 1,
+          "fillGradient": 0,
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 15
+          },
+          "hiddenSeries": false,
+          "id": 6,
+          "interval": "1h",
+          "legend": {
+            "avg": false,
+            "current": false,
+            "max": false,
+            "min": false,
+            "show": true,
+            "total": false,
+            "values": false
+          },
+          "lines": true,
+          "linewidth": 1,
+          "nullPointMode": "null",
+          "options": {
+            "alertThreshold": true
+          },
+          "percentage": false,
+          "pluginVersion": "8.4.0",
+          "pointradius": 2,
+          "points": false,
+          "renderer": "flot",
+          "seriesOverrides": [],
+          "spaceLength": 10,
+          "stack": false,
+          "steppedLine": false,
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "Wq7NJYPGk"
+              },
+              "exemplar": true,
+              "expr": "sum by (job_name)\n(prowjobs{org=\"kubevirt\", state=\"failure\", job_name=~\"${job_name}\"})",
+              "interval": "1h",
+              "legendFormat": "{{job_name}}",
+              "queryType": "randomWalk",
+              "refId": "A"
+            }
+          ],
+          "thresholds": [],
+          "timeRegions": [],
+          "title": "lane failures",
+          "tooltip": {
+            "shared": true,
+            "sort": 0,
+            "value_type": "individual"
+          },
+          "type": "graph",
+          "xaxis": {
+            "mode": "time",
+            "show": true,
+            "values": []
+          },
+          "yaxes": [
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            },
+            {
+              "format": "short",
+              "logBase": 1,
+              "show": true
+            }
+          ],
+          "yaxis": {
+            "align": false
+          }
+        }
+      ],
+      "refresh": "2h",
+      "schemaVersion": 35,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "selected": false,
+              "text": "pull-kubevirt-e2e-.*",
+              "value": "pull-kubevirt-e2e-.*"
+            },
+            "hide": 0,
+            "includeAll": false,
+            "multi": false,
+            "name": "job_name",
+            "options": [
+              {
+                "selected": true,
+                "text": ".*-e2e-.*",
+                "value": ".*-e2e-.*"
+              },
+              {
+                "selected": false,
+                "text": ".*-kubevirt-e2e-.*",
+                "value": ".*-kubevirt-e2e-.*"
+              },
+              {
+                "selected": false,
+                "text": ".*-containerized-data-importer-e2e-.*",
+                "value": ".*-containerized-data-importer-e2e-.*"
+              },
+              {
+                "selected": false,
+                "text": ".*-csi-driver-e2e-.*",
+                "value": ".*-csi-driver-e2e-.*"
+              },
+              {
+                "selected": false,
+                "text": ".*-e2e-cluster-network-addons-operator-.*",
+                "value": ".*-e2e-cluster-network-addons-operator-.*"
+              },
+              {
+                "selected": false,
+                "text": ".*-hyperconverged-cluster-operator-e2e-.*",
+                "value": ".*-hyperconverged-cluster-operator-e2e-.*"
+              },
+              {
+                "selected": false,
+                "text": ".*-vm-import-operator-e2e-.*",
+                "value": ".*-vm-import-operator-e2e-.*"
+              },
+              {
+                "selected": false,
+                "text": "periodic-kubevirt-e2e-k8s-.*",
+                "value": "periodic-kubevirt-e2e-k8s-.*"
+              },
+              {
+                "selected": false,
+                "text": "pull-kubevirt-e2e-k8s-.*",
+                "value": "pull-kubevirt-e2e-k8s-.*"
+              },
+              {
+                "selected": false,
+                "text": "pull-kubevirt-e2e-k8s-1\\.21.*",
+                "value": "pull-kubevirt-e2e-k8s-1\\.21.*"
+              },
+              {
+                "selected": false,
+                "text": "pull-kubevirt-e2e-k8s-1\\.22.*",
+                "value": "pull-kubevirt-e2e-k8s-1\\.22.*"
+              },
+              {
+                "selected": false,
+                "text": "pull-kubevirt-e2e-k8s-1\\.23.*",
+                "value": "pull-kubevirt-e2e-k8s-1\\.23.*"
+              },
+              {
+                "selected": false,
+                "text": "pull-kubevirt-e2e-kind-.*sriov.*",
+                "value": "pull-kubevirt-e2e-kind-.*sriov.*"
+              },
+              {
+                "selected": false,
+                "text": "pull-kubevirt-e2e-kind-.*vgpu.*",
+                "value": "pull-kubevirt-e2e-kind-.*vgpu.*"
+              },
+              {
+                "selected": false,
+                "text": "pull-kubevirt-e2e-.*windows.*",
+                "value": "pull-kubevirt-e2e-.*windows.*"
+              },
+              {
+                "selected": false,
+                "text": "pull-kubevirt-e2e-k8s-.*sig-compute.*",
+                "value": "pull-kubevirt-e2e-k8s-.*sig-compute.*"
+              },
+              {
+                "selected": false,
+                "text": "pull-kubevirt-e2e-k8s-.*sig-network.*",
+                "value": "pull-kubevirt-e2e-k8s-.*sig-network.*"
+              },
+              {
+                "selected": false,
+                "text": "pull-kubevirt-e2e-k8s-.*sig-storage.*",
+                "value": "pull-kubevirt-e2e-k8s-.*sig-storage.*"
+              },
+              {
+                "selected": false,
+                "text": "pull-kubevirt-e2e-k8s-.*operator.*",
+                "value": "pull-kubevirt-e2e-k8s-.*operator.*"
+              },
+              {
+                "selected": false,
+                "text": "pull-kubevirt-e2e-k8s-.*nonroot.*",
+                "value": "pull-kubevirt-e2e-k8s-.*nonroot.*"
+              }
+            ],
+            "query": ".*-e2e-.*,\n.*-kubevirt-e2e-.*,\n.*-containerized-data-importer-e2e-.*,\n.*-csi-driver-e2e-.*,\n.*-e2e-cluster-network-addons-operator-.*,\n.*-hyperconverged-cluster-operator-e2e-.*,\n.*-vm-import-operator-e2e-.*,\nperiodic-kubevirt-e2e-k8s-.*,\npull-kubevirt-e2e-k8s-.*,\npull-kubevirt-e2e-k8s-1\\.21.*,\npull-kubevirt-e2e-k8s-1\\.22.*,\npull-kubevirt-e2e-k8s-1\\.23.*,\npull-kubevirt-e2e-kind-.*sriov.*,\npull-kubevirt-e2e-kind-.*vgpu.*,\npull-kubevirt-e2e-.*windows.*,\npull-kubevirt-e2e-k8s-.*sig-compute.*,\npull-kubevirt-e2e-k8s-.*sig-network.*,\npull-kubevirt-e2e-k8s-.*sig-storage.*,\npull-kubevirt-e2e-k8s-.*operator.*,\npull-kubevirt-e2e-k8s-.*nonroot.*,",
+            "queryValue": "",
+            "skipUrlSync": false,
+            "type": "custom"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-2d",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "e2e jobs overview V2",
+      "uid": "efpTS3t4z",
+      "version": 2,
+      "weekStart": ""
+    }
 ---
 # Source: grafana/templates/tests/test-configmap.yaml
 apiVersion: v1
