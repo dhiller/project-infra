@@ -25,7 +25,7 @@ postsubmits:
           value: quay.io/kubevirt
         command:
         - "/usr/local/bin/runner.sh"
-        - "/bin/sh"
+        - "/bin/bash"
         - "-c"
         - |
           cat "$QUAY_PASSWORD" | docker login --username $(cat "$QUAY_USER") --password-stdin=true quay.io &&
