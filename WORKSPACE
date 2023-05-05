@@ -83,6 +83,13 @@ container_pull(
 )
 
 container_pull(
+    name = "git-base",
+    registry = "gcr.io",
+    repository = "k8s-prow/git",
+    tag = "v20230324-76cde35b3d",
+)
+
+container_pull(
     name = "release-tool-base",
     registry = "index.docker.io",
     repository = "kubevirtci/release-tool-base",
