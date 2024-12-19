@@ -40,3 +40,9 @@ test:
 
 update-labels:
 	./hack/labels/update.sh
+
+go-build-all:
+	go build ./external-plugins/... ./github/ci/services/... ./limiter/... ./releng/... ./robots/...
+
+go-test-all:
+	go test ./external-plugins/...  ./limiter/... ./releng/... ./robots/...
