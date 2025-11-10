@@ -166,10 +166,20 @@ func extractChangedTests(debug bool, revisionRange string, testDirectory string,
 		return err
 	}
 	defer outputTestNamesFile.Close()
-	changedTestNames, err := generateTestNames(allPaths, filepath.Join(repoPath, testDirectory))
+
+	reports, err := doDryRun(filepath.Join(repoPath, testDirectory))
 	if err != nil {
 		return err
 	}
+
+	allNodeTexts := extractNodeTexts(allPaths)
+	matchingSpecReports := filterMatchingSpecsByPartsContainingTestNames(reports, allNodeTexts)
+	changedTestNames, err := generateTestNames(matchingSpecReports)
+	if err != nil {
+		return err
+	}
+	transferLabelsToPathes(matchingSpecReports, allPaths)
+
 	err = json.NewEncoder(outputTestNamesFile).Encode(&changedTestNames)
 	if err != nil {
 		return err
@@ -191,6 +201,29 @@ func extractChangedTests(debug bool, revisionRange string, testDirectory string,
 	return nil
 }
 
+func transferLabelsToPathes(matchingSpecReports []types.SpecReport, allPaths [][]*ginkgo.Node) {
+	matchingReport := []types.Report{
+		{
+			SpecReports: types.SpecReports(matchingSpecReports),
+		},
+	}
+	for _, nodes := range allPaths {
+		matching := filterMatchingSpecByPartContainingTestNames(matchingReport, nodes)
+		if len(matching) != 1 {
+			log.Errorf("could not find exactly one specReport matching")
+			continue
+		}
+		matchingSpecReport := matching[0]
+		for i, node := range nodes {
+			if len(matchingSpecReport.ContainerHierarchyLabels) < i+1 {
+				node.Labels = matchingSpecReport.LeafNodeLabels
+			} else {
+				node.Labels = matchingSpecReport.ContainerHierarchyLabels[i]
+			}
+		}
+	}
+}
+
 func createFile(outputPath string, pattern string) (file *os.File, err error) {
 	if outputPath == "" {
 		file, err = os.CreateTemp("", pattern)
@@ -200,7 +233,7 @@ func createFile(outputPath string, pattern string) (file *os.File, err error) {
 	return
 }
 
-func generateTestNames(allPaths [][]*ginkgo.Node, testFilePath string) ([]string, error) {
+func doDryRun(testFilePath string) ([]types.Report, error) {
 	reports, _, err := ginkgo.DryRun(testFilePath)
 	if err != nil {
 		return nil, fmt.Errorf("could not run ginkgo dry-run in folder %q: %w", testFilePath, err)
@@ -208,7 +241,22 @@ func generateTestNames(allPaths [][]*ginkgo.Node, testFilePath string) ([]string
 	if reports == nil {
 		return nil, fmt.Errorf("no results for ginkgo dry-run in folder %q: %w", testFilePath, err)
 	}
+	return reports, nil
+}
 
+func generateTestNames(matchingSpecReports []types.SpecReport) ([]string, error) {
+	var testNames []string
+	for _, r := range matchingSpecReports {
+		var texts []string
+		texts = append(texts, r.ContainerHierarchyTexts...)
+		texts = append(texts, r.LeafNodeText)
+		testName := strings.Join(texts, " ")
+		testNames = append(testNames, testName)
+	}
+	return testNames, nil
+}
+
+func extractNodeTexts(allPaths [][]*ginkgo.Node) [][]string {
 	var allNodeTexts [][]string
 	for _, path := range allPaths {
 		var nodeTexts []string
@@ -220,18 +268,7 @@ func generateTestNames(allPaths [][]*ginkgo.Node, testFilePath string) ([]string
 		}
 		allNodeTexts = append(allNodeTexts, nodeTexts)
 	}
-
-	matchingSpecReports := filterMatchingSpecsByPartsContainingTestNames(reports, allNodeTexts)
-
-	var testnames []string
-	for _, r := range matchingSpecReports {
-		var texts []string
-		texts = append(texts, r.ContainerHierarchyTexts...)
-		texts = append(texts, r.LeafNodeText)
-		testname := strings.Join(texts, " ")
-		testnames = append(testnames, testname)
-	}
-	return testnames, nil
+	return allNodeTexts
 }
 
 func filterMatchingSpecsByPartsContainingTestNames(reports []types.Report, allNodeTexts [][]string) []types.SpecReport {
@@ -258,6 +295,28 @@ func filterMatchingSpecsByPartsContainingTestNames(reports []types.Report, allNo
 		}
 		return false
 	}, -1)
+	return matchingSpecReports
+}
+
+func filterMatchingSpecByPartContainingTestNames(reports []types.Report, nodes []*ginkgo.Node) []types.SpecReport {
+	matchingSpecReports := ginkgo.FilterSpecReports(reports, func(r types.SpecReport) bool {
+		var specReportTexts []string
+		specReportTexts = append(specReportTexts, r.ContainerHierarchyTexts...)
+		specReportTexts = append(specReportTexts, r.LeafNodeText)
+		if len(specReportTexts) == 1 && specReportTexts[0] == "" {
+			return false
+		}
+		nodeIndex := len(nodes) - 1
+		containsAll := true
+		for specIndex := len(specReportTexts) - 1; specIndex >= 0 && nodeIndex >= 0; specIndex-- {
+			if !strings.Contains(specReportTexts[specIndex], nodes[nodeIndex].Text) {
+				containsAll = false
+				break
+			}
+			nodeIndex--
+		}
+		return containsAll
+	}, 1)
 	return matchingSpecReports
 }
 
